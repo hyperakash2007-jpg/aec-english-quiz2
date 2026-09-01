@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEC English Practice Quiz (50 Questions)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --correct: #22c55e;
+            --incorrect: #ef4444;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: var(--border);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #0f172a;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--primary);
+            background-color: #1a2436;
+        }
+
+        .option-btn.correct {
+            background-color: rgba(34, 197, 94, 0.2) !important;
+            border-color: var(--correct) !important;
+            color: #4ade80;
+        }
+
+        .option-btn.incorrect {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            border-color: var(--incorrect) !important;
+            color: #f87171;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .next-btn, .restart-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .next-btn:hover, .restart-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .next-btn:disabled {
+            background-color: var(--border);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .results-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .results-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .feedback-msg {
+            font-size: 1.1rem;
+            color: var(--text-sub);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1>AEC English Examination Practice</h1>
+            <p>50 Random Questions Selected</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="question-counter" id="question-counter">Question 1 of 50</div>
+        <div class="question-text" id="question-text">Loading Question...</div>
+
+        <div class="options-container" id="options-container">
+            </div>
+
+        <div class="controls">
+            <button class="next-btn" id="next-btn" disabled>Next Question</button>
+        </div>
+    </div>
+
+    <div class="results-screen" id="results-screen">
+        <h2>Quiz Completed!</h2>
+        <div class="score-display" id="score-display">0 / 50</div>
+        <p class="feedback-msg" id="feedback-msg"></p>
+        <button class="restart-btn" id="restart-btn">Try Another Set</button>
+    </div>
+</div>
+
+<script>
+const questionBank = [
+    { q: "What is the primary function of communication in human society?", options: ["Isolation", "Exchange of information and ideas", "Memorization", "Mechanical repetition"], answer: 1 },
+    { q: "Standard dialect is typically characterized by:", options: ["Regional slang and informal idioms", "Use in official, academic, and formal contexts", "Lack of standardized grammar rules", "Exclusively oral transmission"], answer: 1 },
+    { q: "Non-standard dialects are best described as:", options: ["Grammatically incorrect forms of language", "Regional or social variations that differ from the standard form", "Languages spoken only by animals", "Written codes used in computer programming"], answer: 1 },
+    { q: "Which channel of communication relies on body language, gestures, and facial expressions?", options: ["Verbal", "Non-verbal", "Formal written", "Technical documentation"], answer: 1 },
+    { q: "When a message travels from a supervisor to a subordinate in an organization, it is an example of:", options: ["Upward communication", "Downward communication", "Horizontal communication", "Diagonal communication"], answer: 1 },
+    { q: "Communication between peers at the same organizational level is known as:", options: ["Vertical communication", "Horizontal/Lateral communication", "Downward communication", "Upward communication"], answer: 1 },
+    { q: "What is the final step in the communication cycle that completes two-way communication?", options: ["Encoding", "Decoding", "Transmission", "Feedback"], answer: 3 },
+    { q: "Language change over time occurs primarily due to:", options: ["Social contact, cultural shifts, and technological development", "Strict enforcement of static grammar rules", "The removal of all loanwords", "Decree by central government authorities only"], answer: 0 },
+    { q: "The process of converting thoughts into a transmittable message is called:", options: ["Decoding", "Encoding", "Filtering", "Receiving"], answer: 1 },
+    { q: "Noise in the context of communication theory refers to:", options: ["Loud sounds only", "Any interference that distorts or hinders the message", "Music in the background", "The tone of the speaker's voice"], answer: 1 },
+    { q: "Which of the following is an example of psychological noise?", options: ["Traffic sound outside", "Poor internet connection", "Severe anxiety or emotional distress", "Unfamiliar jargon"], answer: 2 },
+    { q: "Semantic barriers in communication arise due to:", options: ["Distance between sender and receiver", "Misunderstanding of words, symbols, or technical terms", "Equipment failure", "Poor eyesight"], answer: 1 },
+    { q: "Old English evolving into Middle English and then Modern English demonstrates:", options: ["Diachronic language change", "Synchronic language stability", "Language extinction", "Phonemic staticity"], answer: 0 },
+    { q: "The study of language at a single point in time without considering its history is called:", options: ["Diachronic linguistics", "Synchronic linguistics", "Etymology", "Philology"], answer: 1 },
+    { q: "Words borrowed from one language and incorporated into another (e.g., algebra, guru) are called:", options: ["Coinages", "Loanwords", "Acronyms", "Neologisms"], answer: 1 },
+    { q: "Which mode of communication is generally time-stamped, permanent, and easy to archive?", options: ["Oral communication", "Written communication", "Paralanguage", "Kinesics"], answer: 1 },
+    { q: "Kinesics is the study of:", options: ["Voice pitch and volume", "Body movements, gestures, and facial expressions", "Physical distance in communication", "Time management"], answer: 1 },
+    { q: "Proxemics deals with the study of:", options: ["Touch in communication", "Use of personal space and physical distance", "Time perception", "Eye contact"], answer: 1 },
+    { q: "Chronemics refers to the role of _______ in non-verbal communication.", options: ["Space", "Time", "Tone", "Posture"], answer: 1 },
+    { q: "Which barrier occurs when cultural differences cause misunderstandings?", options: ["Physical barrier", "Socio-cultural barrier", "Mechanical barrier", "Physiological barrier"], answer: 1 },
+    { q: "In the communication loop, the person who interprets the encoded message is the:", options: ["Encoder", "Receiver / Decoder", "Channel", "Transmitter"], answer: 1 },
+    { q: "Formal communication networks in an organization are often represented by an:", options: ["Informal rumor mill", "Organogram / Organizational structure", "Open chat room", "Unstructured forum"], answer: 1 },
+    { q: "The grapevine is a common term for:", options: ["Formal upward communication", "Informal communication networks", "Official written notices", "Statutory meetings"], answer: 1 },
+    { q: "Which of the 7 Cs of communication ensures that the message contains all necessary facts?", options: ["Conciseness", "Completeness", "Clarity", "Courtesy"], answer: 1 },
+    { q: "Expressing an idea in the fewest, most effective words without sacrificing meaning is called:", options: ["Completeness", "Conciseness", "Correctness", "Concrete detail"], answer: 1 },
+    { q: "Which linguistic term describes newly coined words or phrases?", options: ["Archaisms", "Neologisms", "Dialects", "Jargon"], answer: 1 },
+    { q: "An accent refers specifically to variations in:", options: ["Grammar and vocabulary", "Pronunciation only", "Written syntax", "Spelling conventions"], answer: 1 },
+    { q: "A sociolect is a variety of language associated with a specific:", options: ["Geographical region", "Social class or group", "Historical century", "Formal dictionary"], answer: 1 },
+    { q: "An idiolect is:", options: ["The individual speech pattern of a single person", "The national language of an island", "A dead dialect", "Language used only in law"], answer: 0 },
+    { q: "Which medium allows real-time, bidirectional auditory and visual interaction remotely?", options: ["Memorandum", "Video conferencing", "Registered post", "Circular notice"], answer: 1 },
+    { q: "Active listening requires the receiver to:", options: ["Focus, comprehend, evaluate, and respond attentively", "Prepare their counter-argument while the speaker talks", "Nod continuously without absorbing information", "Multi-task on electronic devices"], answer: 0 },
+    { q: "High-context communication relies heavily on:", options: ["Explicitly stated words and literal definitions", "Implicit cues, context, relationship, and shared background", "Purely written directives", "Mathematical charts"], answer: 1 },
+    { q: "Intrapersonal communication takes place:", options: ["Between two close friends", "Within an individual's own mind (self-talk)", "Among team members in a meeting", "Before a large public audience"], answer: 1 },
+    { q: "Paralanguage includes elements such as:", options: ["Word choices and syntax", "Pitch, tone, pace, and vocal volume", "Written punctuation", "Visual slides"], answer: 1 },
+    { q: "The loss or distortion of meaning as a message passes through multiple levels of communication is called:", options: ["Filtering", "Feedback loop", "Brainstorming", "Synchronic shift"], answer: 0 },
+    { q: "How many vowel sounds (monophthongs + diphthongs) exist in Received Pronunciation (RP) English?", options: ["5", "12", "20", "24"], answer: 2 },
+    { q: "How many consonant sounds are there in Received Pronunciation (RP) English?", options: ["21", "24", "26", "44"], answer: 1 },
+    { q: "A speech sound produced without any obstruction in the vocal tract is a:", options: ["Consonant", "Vowel", "Fricative", "Plosive"], answer: 1 },
+    { q: "Speech sounds formed by completely blocking the airflow and then releasing it suddenly are:", options: ["Fricatives", "Plosives (Stops)", "Nasals", "Approximants"], answer: 1 },
+    { q: "Which of the following is a bilabial plosive sound?", options: ["/p/", "/f/", "/s/", "/k/"], answer: 0 },
+    { q: "A sound produced by bringing the lower lip into contact with the upper teeth is called:", options:
