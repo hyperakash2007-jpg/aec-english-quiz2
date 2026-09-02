@@ -271,4 +271,144 @@ const questionBank = [
     { q: "Choose the correct sentence:", options: ["He is superior than me in rank.", "He is superior to me in rank.", "He is superior from me in rank.", "He is more superior to me in rank."], answer: 1 },
     { q: "What type of clause is underlined in 'The boy WHO WON THE PRIZE is my brother'?", options: ["Adverbial clause", "Relative (Adjective) clause", "Noun clause", "Prepositional phrase"], answer: 1 },
     { q: "Select the correct passive form of: 'She writes a letter.'", options: ["A letter was written by her.", "A letter is written by her.", "A letter is being written by her.", "A letter has been written by her."], answer: 1 },
-    { q:
+];
+
+const QUESTIONS_PER_QUIZ = 50;
+
+let selectedQuestions = [];
+let currentQuestionIndex = 0;
+let score = 0;
+let answered = false;
+
+const quizScreen = document.getElementById("quiz-screen");
+const resultsScreen = document.getElementById("results-screen");
+const questionCounter = document.getElementById("question-counter");
+const questionText = document.getElementById("question-text");
+const optionsContainer = document.getElementById("options-container");
+const nextBtn = document.getElementById("next-btn");
+const restartBtn = document.getElementById("restart-btn");
+const progressFill = document.getElementById("progress-fill");
+const scoreDisplay = document.getElementById("score-display");
+const feedbackMsg = document.getElementById("feedback-msg");
+
+function shuffleQuestions(questions) {
+    const shuffled = [...questions];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+    }
+
+    return shuffled;
+}
+
+function startQuiz() {
+    const quizLength = Math.min(QUESTIONS_PER_QUIZ, questionBank.length);
+
+    selectedQuestions = shuffleQuestions(questionBank).slice(0, quizLength);
+    currentQuestionIndex = 0;
+    score = 0;
+    answered = false;
+
+    quizScreen.style.display = "block";
+    resultsScreen.style.display = "none";
+
+    showQuestion();
+}
+
+function showQuestion() {
+    answered = false;
+    nextBtn.disabled = true;
+
+    const question = selectedQuestions[currentQuestionIndex];
+    const totalQuestions = selectedQuestions.length;
+
+    questionCounter.textContent =
+        `Question ${currentQuestionIndex + 1} of ${totalQuestions}`;
+    questionText.textContent = question.q;
+    optionsContainer.innerHTML = "";
+
+    progressFill.style.width =
+        `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+
+    question.options.forEach((option, optionIndex) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option-btn";
+        button.textContent = option;
+
+        button.addEventListener("click", () => {
+            selectAnswer(optionIndex, button);
+        });
+
+        optionsContainer.appendChild(button);
+    });
+
+    nextBtn.textContent =
+        currentQuestionIndex === totalQuestions - 1
+            ? "Show Result"
+            : "Next Question";
+}
+
+function selectAnswer(selectedOptionIndex, selectedButton) {
+    if (answered) return;
+
+    answered = true;
+
+    const question = selectedQuestions[currentQuestionIndex];
+    const optionButtons = optionsContainer.querySelectorAll(".option-btn");
+
+    optionButtons.forEach((button) => {
+        button.disabled = true;
+    });
+
+    if (selectedOptionIndex === question.answer) {
+        selectedButton.classList.add("correct");
+        score++;
+    } else {
+        selectedButton.classList.add("incorrect");
+        optionButtons[question.answer].classList.add("correct");
+    }
+
+    nextBtn.disabled = false;
+}
+
+function showResults() {
+    quizScreen.style.display = "none";
+    resultsScreen.style.display = "block";
+
+    const totalQuestions = selectedQuestions.length;
+    const percentage = Math.round((score / totalQuestions) * 100);
+
+    scoreDisplay.textContent = `${score} / ${totalQuestions}`;
+
+    if (percentage >= 80) {
+        feedbackMsg.textContent = `Excellent! You scored ${percentage}%.`;
+    } else if (percentage >= 60) {
+        feedbackMsg.textContent = `Good job! You scored ${percentage}%. Keep practising.`;
+    } else if (percentage >= 40) {
+        feedbackMsg.textContent = `You scored ${percentage}%. A little more practice will help.`;
+    } else {
+        feedbackMsg.textContent = `You scored ${percentage}%. Keep practising and try again.`;
+    }
+}
+
+nextBtn.addEventListener("click", () => {
+    if (!answered) return;
+
+    currentQuestionIndex++;
+
+    if (currentQuestionIndex < selectedQuestions.length) {
+        showQuestion();
+    } else {
+        showResults();
+    }
+});
+
+restartBtn.addEventListener("click", startQuiz);
+
+startQuiz();
+</script>
+
+</body>
+</html>
